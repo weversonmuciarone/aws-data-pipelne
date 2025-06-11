@@ -1,0 +1,53 @@
+# ingests 2 tables from a database
+
+steps:
+  # Read from the source S3 bucket (first prefix)
+  - name: titanic_test
+    type : s3
+    config:
+      bucket: <SOURCE_BUCKET>
+      prefix : <S3_PREFIX>
+      options:
+        format : csv
+        inferSchema: true
+        sep: ","
+        header : true
+
+  - name: titanic_submission
+    # Read from the source S3 bucket (second prefix)
+    type : s3
+    config:
+      bucket: <SOURCE_BUCKET>
+      prefix : <S3_PREFIX>
+      options:
+        format : csv
+        inferSchema: true
+        sep: ","
+        header : true
+
+  # Materializing the views
+  - name: titanic_test_materialize
+    # Materialize the first dataframe in a Glue table and store the output in S3 (parquet file)
+    type: materialize
+    config:
+      target: titanic_test
+      database: <DESTINATION_GLUE_DATABASE>
+      table: materialized_test_table
+      bucket: <DESTINATION_S3_BUCKET>
+      prefix: materialized/test_table
+      options:
+        format: parquet
+      description: "titanic test info"
+
+  - name: titanic_submission_materialize
+    # Materialize the second dataframe in a Glue table and store the output in S3 (parquet file)
+    type: materialize
+    config:
+      target: titanic_submission
+      database: <DESTINATION_GLUE_DATABASE>
+      table: materialized_submission_table
+      bucket: <DESTINATION_S3_BUCKET>
+      prefix: materialized/submission_table
+      options:
+        format: parquet
+      description: "titanic submission info"

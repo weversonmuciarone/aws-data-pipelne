@@ -1,0 +1,94 @@
+# An example with all scenarios covered for data reconciliation yaml file
+
+variables:
+  file: variables.yaml
+
+queries: steps
+udfs: udfs
+tests: tests
+
+steps:
+
+# Scenario 1
+  - name: reconc_count_df
+    type: data_reconciliation
+    config:
+      compare_type: count
+      source_location: <source_df@source_location_path>      # ex: landing_df@s3://{{bucket_name}}/{{stage}}/Landing_Area/table_name/incoming/
+      target_location: <target_df@target_location_path>      # ex: cleansed_df@s3://{{bucket_name}}/{{stage}}/Cleansed_Area/table_name/
+
+  - name: reconc_materialize
+    type: materialize
+    config:
+      target: <target df>
+      bucket: <tartget bucket>
+      prefix: <target folder name>
+      database: <target database>
+      table: <metadata table name>
+      mode: append
+      options:
+        format: parquet
+
+# Scenario 2
+  - name: reconc_count_table
+    type: data_reconciliation
+    config:
+      compare_type: count
+      source_location: <source_db.source_table>    # ex: "test_db.test_table1"
+      target_location: <target_db.target_table>    # ex: "test_db2.test_table2"
+
+  - name: reconc_materialize
+    type: materialize
+    config:
+      target: <target df>
+      bucket: <tartget bucket>
+      prefix: <target folder name>
+      database: <target database>
+      table: <metadata table name>
+      mode: append
+      options:
+        format: parquet
+
+# Scenario 3
+  - name: reconc_sum_table
+    type: data_reconciliation
+    config:
+      compare_type: measure
+      source_measure_columns: <comma seperated source measure columns>    # ex: "col1,col2"
+      target_measure_columns: <comma seperated target measure columns>    # ex: "col1,col2"
+      source_location: <source_db.source_table>                           # ex: "test_db.test_table1"
+      target_location: <target_db.target_table>                           # ex: "test_db2.test_table2"
+
+  - name: reconc_materialize
+    type: materialize
+    config:
+      target: <target df>
+      bucket: <tartget bucket>
+      prefix: <target folder name>
+      database: <target database>
+      table: <metadata table name>
+      mode: append
+      options:
+        format: parquet
+
+# Scenario 4
+  - name: reconc_sum_df
+    type: data_reconciliation
+    config:
+      compare_type: measure
+      source_measure_columns: <comma seperated source measure columns>    # ex: "col1,col2"
+      target_measure_columns: <comma seperated target measure columns>    # ex: "col1,col2"
+      source_location: <source_df@source_location_path>                   # ex: landing_df@s3://{{bucket_name}}/{{stage}}/Landing_Area/table_name/incoming/
+      target_location: <target_df@target_location_path>                   #cleansed_df@s3://{{bucket_name}}/{{stage}}/Cleansed_Area/table_name/
+
+  - name: reconc_materialize
+    type: materialize
+    config:
+      target: <target df>
+      bucket: <tartget bucket>
+      prefix: <target folder name>
+      database: <target database>
+      table: <metadata table name>
+      mode: append
+      options:
+        format: parquet

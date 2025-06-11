@@ -1,0 +1,92 @@
+nblines : 10
+queries: steps
+udfs : udfs
+tests: tests
+
+variables:
+  file: variables.yaml
+
+steps:
+#Steps to load the Custom Group lookup file into a dataframe and cleanse
+
+  - name: move_input_to_staging
+    type: move
+    config:
+      from_bucket: {{ingest_bucket}}
+      to_bucket: {{ingest_bucket}}
+      from_folder: {{stage}}/incoming/workday/leave_of_absence/input
+      to_folder: {{stage}}/incoming/workday/leave_of_absence/staging
+
+  - name: json_file_read
+    type: s3
+    config:
+      bucket: {{ingest_bucket}}
+      prefix: {{stage}}/incoming/workday/leave_of_absence/staging/
+      read_method: spark
+      exit_step_function: "yes"
+      options:
+        format: text
+
+  - name: leave_of_absence_json_parsing
+    type: generic_json_parser
+    config:
+      target: json_file_read
+      flat_file_write : 'yes'
+      output_bucket: {{ingest_bucket}}
+      prefix: {{stage}}/incoming/workday/leave_of_absence/json_flat
+      error_bucket: {{ingest_bucket}}
+      error_prefix: {{stage}}/incoming/workday/leave_of_absence/malformed
+      field_function: custom
+      options:
+        char_remove: ["wd:"]
+        field_update: []
+        central_bucket: {{central_logging_bucket}}
+  
+  - name: leave_of_absence_ingestion_columns_split
+    type: split_list_columns
+    config:
+      target1: leave_of_absence_json_parsing
+      col_list_fix: "report_entry_effective_moment,worker_group_loa_workday_id,leave_of_absence_event_group_loa_start_date,leave_of_absence_event_group_loa_end_date,leave_of_absence_event_group_loa_approval_date,leave_of_absence_event_group_loa_leave_of_absence_type,leave_of_absence_event_group_loa_date_rescinded"
+      col_list_dynamic: ""
+
+  - name: leave_of_absence_ingestion_colrenamed
+    type: cleanse
+    config:
+      target: leave_of_absence_ingestion_columns_split
+      cleansing_rule: "rename_columns"
+      mapping: "{\"report_entry_effective_moment\":\"effective_moment\",\"worker_group_loa_workday_id\":\"loa_workday_id\",\"leave_of_absence_event_group_loa_start_date\":\"loa_start_date\",\"leave_of_absence_event_group_loa_end_date\":\"loa_end_date\",\"leave_of_absence_event_group_loa_approval_date\":\"loa_approval_date\",\"leave_of_absence_event_group_loa_leave_of_absence_type\":\"loa_absence_type\",\"leave_of_absence_event_group_loa_date_rescinded\":\"loa_rescinded_date\"}"
+
+  - name: leave_of_absence_ingestion_colselected
+    type: cleanse
+    config: 
+      target: leave_of_absence_ingestion_colrenamed
+      cleansing_rule: "select_columns"  
+      mapping: "{\"list_cols\": [\"effective_moment\",\"loa_workday_id\", \"loa_start_date\", \"loa_end_date\", \"loa_approval_date\", \"loa_absence_type\", \"loa_rescinded_date\"]}"
+  
+  - name: leave_of_absence_drop_null_rows
+    type: cleanse
+    config:
+      target: leave_of_absence_ingestion_colselected
+      cleansing_rule: "filter_nulls"
+      filter_nulls: 
+        columns: "loa_workday_id"
+
+  - name: leave_of_absence_ingestion_with_added_columns
+    type: cleanse
+    config:
+      target: leave_of_absence_drop_null_rows
+      cleansing_rule: "add_column"
+      mapping: "{\"dh_load_ts\":\"current_timestamp\",\"source_system_id\":\"1\"}"
+
+  - name: materialize_leave_of_absence_ingestion
+    type: materialize
+    config:
+      target: leave_of_absence_ingestion_with_added_columns
+      bucket: {{cleansed_bucket}}
+      prefix: {{stage}}/cleansed/employee_leave_of_absence
+      database: {{cleansed_db}}{{stage_}}
+      table: employee_leave_of_absence
+      mode: overwrite
+      options:
+        format: parquet
+        partitions: ["dh_load_ts"]

@@ -1,0 +1,26 @@
+nblines : 10
+queries: steps
+udfs : udfs
+tests: tests
+
+variables:
+  file: variables.yaml
+
+steps:
+
+
+# trigger step
+
+  - name: trigger_file
+    type: trigger_file
+    config:
+      to_bucket: {{consumption_bucket}}
+      file_name: {{stage}}/trigger/mhr_absence/leave_off_trigger.txt
+
+  - name: end
+    type: logging
+    config:
+      options:
+        log_type: PipelineEnd
+        status: "SUCCESS"
+        central_bucket: {{central_logging_bucket}}

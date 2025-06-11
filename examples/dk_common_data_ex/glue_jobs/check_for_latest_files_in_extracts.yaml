@@ -1,0 +1,14 @@
+queries: steps
+udfs : udfs
+tests: tests
+
+steps:
+  # use s3_file_validator handler to validate files in S3
+  - name: validate_files
+    type: validate_file
+    config:
+      # Replace this value with bucket containing the data
+      bucket: dataall-denmarksapr3k-ou2dnvu3
+      prefix:
+        - fq0clnt100/0coorder_attr
+        - fq0clnt100/0coorder_text

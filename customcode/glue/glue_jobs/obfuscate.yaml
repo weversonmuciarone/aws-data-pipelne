@@ -1,0 +1,14 @@
+# An example YAML file
+
+
+nblines : 10
+queries: steps
+udfs : udfs
+tests: tests
+
+steps:
+  - name: hidepii
+    type: obfuscate
+    config:
+      obfuscate_cols: "emailaddress,name"
+      target: rawdatainput

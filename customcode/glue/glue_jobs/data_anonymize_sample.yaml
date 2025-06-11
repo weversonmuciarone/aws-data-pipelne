@@ -1,0 +1,55 @@
+variables:
+  file: variables.yaml
+
+queries: steps
+udfs: udfs
+tests: tests
+
+steps:
+# scenario 1: conversion-> mask, file_type -> csv
+  - name: conversion_df_mask_csv
+    type: data_anonymization
+    config:
+      anonymize_cols: "emp_datetime|datetime|%Y.%m.%d %H:%M:%S,emp_date|date,emp_address|string,emp_id|int,emp_deci|decimal"
+      source_prefix: {{stage}}/Landing/conversion_test/original/csv/
+      source_bucket: {{bucket_name}}
+      target_prefix: test_base_service/conversion_mask/csv/
+      target_bucket: dhrampupcwyzrgeuwest1
+      file_format: csv
+      conversion_type: mask
+
+# scenario 2: conversion-> mask, file_type -> parquet
+  - name: conversion_df_mask_parquet
+    type: data_anonymization
+    config:
+      anonymize_cols: "emp_datetime|datetime,emp_date|date,emp_address|string,emp_id|int,emp_deci|decimal"
+      source_prefix: {{stage}}/Landing/conversion_test/original/parquet/
+      source_bucket: {{bucket_name}}
+      target_prefix: {{stage}}/Landing/conversion_test/converted/conversion_mask/parquet/
+      target_bucket: {{bucket_name}}
+      file_format: parquet
+      conversion_type: mask
+
+# scenario 3: conversion-> anonymize, file_type -> csv
+  - name: conversion_df_anonymize_csv
+    type: data_anonymization
+    config:
+      anonymize_cols: "emp_datetime|datetime|%Y.%m.%d %H:%M:%S,emp_date|date,emp_address|string,emp_id|int,emp_deci|decimal"
+      source_prefix: {{stage}}/Landing/conversion_test/original/csv/
+      source_bucket: {{bucket_name}}
+      target_prefix: {{stage}}/Landing/conversion_test/converted/conversion_anonymize/csv/
+      target_bucket: {{bucket_name}}
+      file_format: csv
+      conversion_type: anonymize
+
+# scenario 4: conversion-> anonymize, file_type -> parquet
+  - name: conversion_df_anonymize_parquet
+    type: data_anonymization
+    config:
+      anonymize_cols: "emp_datetime|datetime,emp_date|date,emp_address|string,emp_id|int,emp_deci|decimal"
+      source_prefix: {{stage}}/Landing/conversion_test/original/parquet/
+      source_bucket: {{bucket_name}}
+      target_prefix: {{stage}}/Landing/conversion_test/converted/conversion_anonymize/parquet/
+      target_bucket: {{bucket_name}}
+      file_format: parquet
+      conversion_type: anonymize

@@ -1,0 +1,17 @@
+# An example of reconciliation notification YAML file.
+
+variables:
+  file: variables.yaml
+
+queries: steps
+udfs: udfs
+tests: tests
+
+steps:
+  - name: updated_reconc_df
+    type: table_notification
+    config:
+      table: <metadata_db.metadata_table>          #ex: test_db.recon_metadata
+      bucket: <metadata table bucket>
+      prefix: <metadata table prefix>              #ex: {{stage}}/Athena_tmp/metadata/
+      central_log_bucket: <Central log bucket name>

@@ -1,0 +1,35 @@
+nblines : 10
+queries: steps
+udfs : udfs
+tests: tests
+
+variables:
+  file: variables.yaml
+
+steps:
+#Steps to load the Custom Group lookup file into a dataframe and cleanse
+  - name: loa_dim_employee_absence
+    type: query
+    config:
+      file: source_queries/loa_dim_employee_absence.sql
+
+  - name: loa_dim_employee_absence_obfuscate
+    type: obfuscate
+    config:
+      obfuscate_cols: "hudi_key"
+      target: loa_dim_employee_absence
+
+  - name: materialize_dim_employee
+    type: hudi_materialize
+    config:
+      target: loa_dim_employee_absence_obfuscate
+      bucket: {{conformed_bucket}}
+      prefix: {{stage}}/processed/dim_absence
+      database: {{conformed_db}}{{stage_}}
+      table: dim_absence
+      pk: hudi_key
+      hoodie_write_operation: upsert
+      combine_key: dh_load_ts
+      mode: append
+      options:
+        format: parquet

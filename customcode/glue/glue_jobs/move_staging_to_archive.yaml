@@ -1,0 +1,19 @@
+nblines : 10
+queries: steps
+udfs : udfs
+tests: tests
+
+variables:
+  file: variables.yaml
+
+steps:
+
+#Steps to load the Custom Group lookup file into a dataframe and cleanse
+  - name: move_staging_to_archive
+    type: move
+    config:
+      from_bucket: {{ingest_bucket}}
+      to_bucket: {{ingest_bucket}}
+      from_folder: {{stage}}/incoming/workday/leave_of_absence/staging
+      to_folder: {{stage}}/incoming/workday/leave_of_absence/archive
+

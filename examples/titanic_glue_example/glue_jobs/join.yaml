@@ -1,0 +1,25 @@
+# Joins and materializes 2 tables table
+
+nblines : 10
+queries: sql_queries
+udfs : udfs
+tests: tests
+
+steps:
+  - name: joined_tables
+    # Run the SQL defined in sql_queries/join.sql
+    type : query
+    config:
+      file: join.sql
+
+  - name : joined_tables_materialize
+    # Materialize the joined dataframe in a Glue table and store the output in S3 (parquet file)
+    type: materialize
+    config:
+      target: joined_tables
+      database: <DESTINATION_GLUE_DATABASE>
+      table: materialized_joined_tables
+      bucket: <DESTINATION_S3_BUCKET>
+      prefix: materialized/joined_table
+      options:
+        format: parquet

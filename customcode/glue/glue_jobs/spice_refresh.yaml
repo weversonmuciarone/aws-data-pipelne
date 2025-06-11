@@ -1,0 +1,10 @@
+queries: steps
+udfs : udfs
+tests: tests
+
+steps:
+  - name: spice_refresh
+    type : spice_refresh
+    config:
+      accountId: "046497497889"
+      dataSetId: "a81eda1e-90d6-443b-8f98-afb0fd5c4b3a"

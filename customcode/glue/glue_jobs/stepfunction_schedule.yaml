@@ -1,0 +1,28 @@
+# An example YAML file
+nblines : 10
+queries: steps
+udfs : udfs
+tests: tests
+
+variables:
+  file: variables.yaml
+  
+steps:
+
+  - name: start
+    type: logging
+    config:
+      options:
+        log_type: PipelineStart
+        status: "STARTED"
+        central_bucket: {{central_logging_bucket}}
+
+  - name: stepfunction_scheduler
+    type: pipeline_queue_executor
+    config:
+      sleep_time: 60
+      total_wait_time : 43200
+      dependent_stepfunction_name : dataall-ukb-time-off-8vottekk,dataall-ukb-opr-staff-absence-poy25exi,dataall-ukb-consumption-mhr-absence-h6zp780r
+
+
+

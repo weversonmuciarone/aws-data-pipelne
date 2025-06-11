@@ -1,0 +1,11 @@
+queries: steps
+udfs : udfs
+tests: tests
+
+steps:
+  - name: end
+    type: logging
+    config:
+      options:
+        log_type: end
+        status: "SUCCESS"

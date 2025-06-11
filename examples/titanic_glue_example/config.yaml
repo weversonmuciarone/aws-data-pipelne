@@ -1,0 +1,45 @@
+# YAML for ingestion and SQL transformation of Open-travel data
+name : Ingestion and SQL Transformation
+
+properties:
+  timeout: 2000
+
+# Create a SNS topic in the account
+aws_resources:
+  - name: SNSTopicPipeline
+    type: sns_topic
+    config:
+        subscriber_accounts: [{{aws_account_id}}]
+
+# Lambda function triggering the step function
+triggers:
+  - name: trigger_{{model_name}}
+    type: lambda_function
+    config:
+     entry: "customcode/lambda_functions/titanic_glue"
+     index: "handler.py"
+     handler: "handler"
+
+groups:
+  # This job is where data is read from S3 and materialized in Glue tables
+  - name: Ingest
+    jobs:
+      - name : Ingest
+        config: "ingest.yaml"
+        type: glue_job
+
+  # This job is where the two materialized tables are joined together and materialized in Glue
+  - name: Join tables  # Join airlines and websites and materialize in Glue tables
+    jobs:
+        - name: Join_tables
+          config: "join.yaml"
+          type: glue_job
+
+  # Publish "PIPELINE COMPLETED" message to the SNS topic
+  - name: SNSPublish
+    jobs:
+      - name: MySNSPublishTask
+        type: sns_publish
+        config:
+          topic_name: SNSTopicPipeline-{{pipeline_name}}-{{stage}}
+          message: "PIPELINE COMPLETED"

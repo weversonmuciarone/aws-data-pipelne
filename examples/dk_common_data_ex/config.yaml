@@ -1,0 +1,27 @@
+# YAML for ingestion and SQL transformation of Open-travel data
+name : Common_model_pipeline
+
+properties:
+  timeout: 2000
+
+groups:
+   - name: "Prevalidations"
+     # First Glue job: validate S3 data
+     jobs:
+        - name: check_for_latest_files_in_extracts
+          config: "check_for_latest_files_in_extracts.yaml"
+          type: glue_job
+
+   - name: "Load_ERP_delta_extracts"
+     # Second Glue job: Load, clean and materialize the data
+     jobs:
+        - name: load_delta_coorder_attr
+          config: load_delta_coorder_attr.yaml
+          type: glue_job
+          properties:
+            enable_bookmark: job-bookmark-enable
+        - name: load_delta_coorder_text
+          config: load_delta_coorder_text.yaml
+          type: glue_job
+          properties:
+            enable_bookmark: job-bookmark-enable

@@ -1,0 +1,13 @@
+# Variables
+glue_var_1 : variable_example
+
+ingest_bucket : ingest-bucket
+cleansed_bucket : cleansed-bucket
+conformed_bucket : conformed
+
+cleansed_db : cleansed_db
+conformed_db : conformed_db
+
+consumption_bucket : consumption_bucket
+
+central_logging_bucket : data-pipeline-logs

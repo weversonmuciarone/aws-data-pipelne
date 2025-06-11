@@ -1,0 +1,49 @@
+queries: steps
+udfs : udfs
+tests: tests
+
+steps:
+  # Load file from S3
+  - name: st_0coorder_attr_s3csv
+    type: s3
+    config:
+      # Replace this value with bucket containing the data
+      bucket: dataall-denmarksapr3k-ou2dnvu3
+      prefix: fq0clnt100/0coorder_attr
+      read_method: glue
+      options:
+        format: csv
+        inferSchema: true
+        sep: ","
+        header: true
+        escape: \
+        # transformation_ctx is comented because we are running our tests on static data (no changes between runs).
+        # But should be uncommented for production pipeline
+#        transformation_ctx: ctx_coorder_attr
+
+  # Use cleanse handler to remove null values in specific columns
+  - name: st_0coorder_attr_nullsremoved
+    type: cleanse
+    config:
+      target: st_0coorder_attr_s3csv
+      cleansing_rule: "filter_nulls"
+      filter_nulls:
+        columns: "AUFNR"
+
+  # Materialize the dataframe as a glue table and in S3
+  - name: materialize_coorder_attr_cleansed
+    type: hudi_materialize
+    config:
+      target: st_0coorder_attr_nullsremoved
+      # Replace this value with bucket containing the data
+      bucket: dataall-denmarksapr3k-ou2dnvu3
+      prefix: test/cleansed/cleansed_coorder_attr
+      # Replace this value with the glue database name
+      database: dataall_denmarksapr3k_ou2dnvu3
+      table: cleansed_coorder_attr
+      pk: AUFNR
+      hoodie_write_operation: upsert
+      combine_key: load_datetime
+      mode: append
+      options:
+        format: parquet

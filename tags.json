@@ -1,0 +1,10 @@
+{
+    "test": {
+        "business": "UK",
+        "key2": "value2"
+    },
+    "prod": {
+        "key1": "value1",
+        "key2": "value2"
+    }
+}
