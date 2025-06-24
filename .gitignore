@@ -5,7 +5,6 @@ setenv.sh
 tests/unittests/test-reports/**
 metastore_db/**
 *.log
-**buildspec**.yaml
 **.zip
 .DS_Store
 pyvenv.cfg

@@ -1,0 +1,13 @@
+
+        version: '0.2'
+        phases:
+          pre_build:
+            commands:
+            - aws --version
+          build:
+            commands:
+            - if [ -d "smjobs" ]; then ls smjobs; fi
+            - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 137112412989.dkr.ecr.us-east-1.amazonaws.com
+            - if [ -d "smjobs" ]; then docker build -f smjobs/Dockerfile -t $ECR_REPOSITORY .; fi
+            - if [ -d "smjobs" ]; then docker push $ECR_REPOSITORY; fi
+        

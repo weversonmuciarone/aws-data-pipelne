@@ -1,0 +1,41 @@
+
+            version: '0.2'
+            phases:
+              pre_build:
+                commands:
+                - n 16.15.1
+                - npm install -g aws-cdk && pip install -r requirements.txt && pip install -r
+                  dev-requirements.txt
+                - pip install pytest
+                - pip install pytest-cov
+                - pip install pytest-spark
+              build:
+                commands:
+                    - python -m pytest --cov=engine --cov=utils --cov-branch --cov-report
+                        term-missing --cov-report xml:tests/unittests/test-reports/coverage.xml  --junitxml=tests/unittests/test-reports/junit.xml  tests/unittests
+                    - python -m pytest --cov=customcode --cov-branch  --cov-report term-missing
+                        --cov-report xml:tests/unittests-custom/test-reports-custom/coverage.xml  --junitxml=tests/unittests-custom/test-reports-custom/junit.xml  tests/unittests-custom
+            reports:
+              pytest_reports:
+                files:
+                - junit.xml
+                base-directory: tests/unittests/test-reports
+                file-format: JUNITXML
+              coverage_reports:
+                files:
+                - coverage.xml
+                base-directory: tests/unittests/test-reports
+                file-format: COBERTURAXML
+              custom_unit_test_reports:
+                files:
+                - junit.xml
+                base-directory: tests/unittests-custom/test-reports-custom
+                file-format: JUNITXML
+              custom_coverage_reports:
+                files:
+                - coverage.xml
+                base-directory: tests/unittests-custom/test-reports-custom
+                file-format: COBERTURAXML
+            artifacts:
+              files: "**/*"
+        

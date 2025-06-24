@@ -1,0 +1,37 @@
+
+            version: '0.2'
+            phases:
+              pre_build:
+                commands:
+                - n 16.5.1
+                - npm install -g aws-cdk && pip install -r requirements.txt
+                - mkdir -p libs/
+                - mkdir -p dist/
+                - mkdir -p jars/
+              build:
+                commands:
+                    - aws sts get-caller-identity
+                    - cdk synth
+                    - cdk deploy --require-approval never --all
+                    - pip install -r glue-requirements.txt -t ./libs
+                    - mkdir -p ./libs/pydeequ
+                    - mkdir -p ./libs/engine
+                    - cp -r engine/glue/pydeequ ./libs/
+                    - cp -r customcode/glue/sql_queries ./libs
+                    - cp -r customcode/glue/udfs ./libs
+                    - cp -r engine/glue ./libs/engine/glue
+                    - cd libs
+                    - zip -r ../dist/deps.zip ./*
+                    - rm -rf ./libs/
+                    - aws s3 cp ../config.yaml s3://$BUCKET_NAME/test/config.yaml
+                    - aws s3 cp ../engine/glue/glue_main.py  s3://$BUCKET_NAME/test/engine/glue/glue_main.py
+                    - aws s3 cp --recursive ../examples/data s3://$BUCKET_NAME/test/data
+                    - aws s3 cp --recursive ../customcode/glue/glue_jobs/ s3://$BUCKET_NAME/test/customcode/glue/glue_jobs/
+                    - aws s3 cp --recursive ../customcode/glue/sql_queries/ s3://$BUCKET_NAME/test/customcode/glue/sql_queries/
+                    - aws s3 cp --recursive ../engine/glue/jars/ s3://$BUCKET_NAME/test/engine/glue/jars
+                    - aws s3 cp --recursive ../customcode/glue/variables_files/ s3://$BUCKET_NAME/test/customcode/glue/variables_files/
+                    - aws s3 cp ../dist/deps.zip s3://$BUCKET_NAME/test/engine/glue/deps.zip
+            artifacts:
+              base-directory: cdk.out
+              files: "**/*"
+        

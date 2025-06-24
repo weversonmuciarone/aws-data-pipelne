@@ -1,0 +1,13 @@
+
+        version: "0.2"
+
+        phases:
+          build:
+            commands:
+              - if [ -d "smjobs" ]; then ls engine; fi
+              - if [ -d "smjobs" ]; then python -m engine.sagemaker.image_builder; fi
+          pre_build:
+            commands:
+              - if [ -d "smjobs" ]; then pip install -r requirements.txt; fi
+              - if [ -d "smjobs" ]; then pip install -r dev-requirements.txt; fi
+        
