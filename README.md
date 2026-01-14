@@ -3,7 +3,7 @@ The content of the directory is the directory that is used as a base for data.al
 account repository.
 
 ## ⚠️ Important ⚠️ - To do when creating new data.all pipelines
-For every Glue jobs to run, Arriva data.all pipelines require **3 jar files**:
+For every Glue jobs to run, data.all pipelines require **3 jar files**:
 
 * deequ-1.0.5.jar
 * deequ-2.0.0-spark-3.1.jar
